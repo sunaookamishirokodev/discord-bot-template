@@ -6,12 +6,21 @@
  */
 
 const { log } = require("./utils/extensions");
-const { Client, GatewayIntentBits, Partials, ActivityType, Collection } = require("discord.js");
+const {
+  Client,
+  GatewayIntentBits,
+  Partials,
+  ActivityType,
+  Collection,
+} = require("discord.js");
 
 // Check bot token
 require("dotenv").config({ path: "./secret/env" });
 if (!process.env.BOT_TOKEN) {
-  return log("No bot token found. Please edit ./secret/env file and add your token", "err");
+  return log(
+    "No bot token found. Please edit ./secret/env file and add your token",
+    "err"
+  );
 }
 
 // Config file
@@ -42,18 +51,25 @@ const client = new Client({
 const global = {
   prefixCommands: new Collection(),
   slashCommands: new Collection(),
-  aliases: new Collection()
+  aliases: new Collection(),
+  emojis: {
+    error: "❌",
+    success: "✔️",
+    congratulations: "🎉",
+    ping: "🏓",
+    gift: "🎁",
+  },
 };
 
 await client.login(process.env.BOT_TOKEN).then((token) => {
   client.commandArray = [];
 
-  require("./src/handlers/commands")()
+  require("./src/handlers/commands")();
 
-  if(config.deploy) require("./src/handlers/deploy")(client);
+  if (config.deploy) require("./src/handlers/deploy")(client);
   if (config.mongodb) require("./src/handlers/mongoose")();
 });
 
 module.exports = {
-  global
-}
+  global,
+};
