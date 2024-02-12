@@ -15,63 +15,46 @@ const { global } = require("../..");
  */
 module.exports = (client) => {
   for (const type of readdirSync(`./src/commands/`)) {
-    for (const dir of readdirSync(`./src/commands/${type}/`)) {
-      for (const file of readdirSync(
-        `./src/commands/${type}/${dir}`
-      )) {
-        const module = require(`../commands/${type}/${dir}/${file}`);
+    for (const dir of readdirSync(`./src/commands/${type}/`).filter(
+      (f) => f.endsWith(".js")
+    )) {
+      const module = require(`../commands/${type}/${dir}`);
 
-        if (!module) continue;
+      if (!module) continue;
 
-        switch (type) {
-          case "prefix": {
-            if (!module.data?.name || !module.execute) {
-              log(
-                "Unable to load the command " +
-                  file +
-                  " due to missing 'data#name' or/and 'execute' properties.",
-                "warn"
-              );
+      if (!module.data?.name || !module.execute) {
+        log(
+          `Unable to load the command ${file} due to missing 'data#name' or/and 'execute' properties.`,
+          "warn"
+        );
 
-              continue;
-            }
+        continue;
+      }
 
-            global.prefixCommands.set(module.data.name, module);
+      switch (type) {
+        case "prefix":
+          global.prefixCommands.set(module.data.name, module);
 
-            if (
-              module.data.aliases &&
-              Array.isArray(module.data.aliases)
-            ) {
-              module.data.aliases.forEach((alias) => {
-                global.aliases.set(alias, module.data.name);
-              });
-            }
-            module.data.category = dir;
-
-            break;
+          if (
+            module.data.aliases &&
+            Array.isArray(module.data.aliases)
+          ) {
+            module.data.aliases.forEach((alias) => {
+              global.aliases.set(alias, module.data.name);
+            });
           }
-          case "slash": {
-            if (!module.data?.name || !module.execute) {
-              log(
-                "Unable to load the command " +
-                  file +
-                  " due to missing 'data#name' or/and 'execute' properties.",
-                "warn"
-              );
 
-              continue;
-            }
+          break;
 
-            global.slashCommands.set(module.data.name, module);
-            client.commandArray.push(module.data);
-            module.option.category = dir;
+        case "slash":
+          global.slashCommands.set(module.data.name, module);
+          global.commandArray.push(module.data);
 
-            break;
-          }
-          default: {
-            log(`Invalid type of command: '${type}'`);
-          }
-        }
+          break;
+
+        default:
+          log(`Invalid type of command: '${type}'`);
+          break;
       }
     }
   }
