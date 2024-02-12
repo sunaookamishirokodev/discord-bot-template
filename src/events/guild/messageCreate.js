@@ -5,17 +5,16 @@
  * For more information, see README.md and LICENSE
  */
 
-const { ChannelType } = require("discord.js");
+const { ChannelType, time } = require("discord.js");
 const config = require("../../../secret/config.json");
-const GuildSchema = require("../../schemas/GuildSchema");
 const { global } = require("../../../index");
 const { log } = require("../../../utils/extensions");
-const NodeCache = require('node-cache');
+const NodeCache = require("node-cache");
 
 const cooldown = new NodeCache({
   checkperiod: 700,
-  deleteOnExpire: true
-})
+  deleteOnExpire: true,
+});
 
 module.exports = {
   event: "messageCreate",
@@ -36,17 +35,6 @@ module.exports = {
     if (config.prefix) return;
 
     let prefix = config.prefix;
-
-    if (config.mongodb) {
-      try {
-        let guildDoc = await GuildSchema.findOne({
-          guildId: message.guild.id,
-        });
-        if (guildDoc && guildDoc?.prefix) prefix = guildData.prefix;
-      } catch (err) {
-        prefix = config.prefix;
-      }
-    }
 
     if (!message.content.startsWith(prefix)) return;
 
@@ -79,9 +67,9 @@ module.exports = {
         // Check private command
         if (
           command.data.privateCmd &&
-          !config.users.privateUserArray.includes(message.author.id)
+          !config.privateUserArray.includes(message.author.id)
         ) {
-          await message.re(
+          await message.reply(
             `${global.emojis.error} **|** You are not authorized to use this command!`
           );
 
@@ -97,38 +85,22 @@ module.exports = {
         }
 
         if (command.data?.cooldown) {
-          const cooldownFunction = () => {
-            let data = cooldown.get(message.author.id);
-
-            data.push(commandInput);
-
-            cooldown.set(message.author.id, data);
-
-            setTimeout(() => {
-              let data = cooldown.get(message.author.id);
-
-              data = data.filter((v) => v !== commandInput);
-
-              if (data.length <= 0) {
-                cooldown.delete(message.author.id);
-              } else {
-                cooldown.set(message.author.id, data);
-              }
-            }, command.data.cooldown);
-          };
-
-          if (cooldown.has(message.author.id)) {
-            let data = cooldown.get(message.author.id);
-
-            if (data.some((v) => v === commandInput)) {
-              await message.reply(``)
-
-              return;
-            }
+          const cooldownPeriod = cooldown.get(
+            `${message.author.id}:${commandInput}`
+          );
+          if (cooldownPeriod) {
+            const cooldownEndAt = new Date(cooldownPeriod);
+            return message.reply(`${time(cooldownEndAt, "R")}`);
           } else {
-            cooldownFunction();
+            cooldown.set(
+              `${message.author.id}:${commandInput}`,
+              Date.now() + command.data?.cooldown,
+              command.data?.cooldown
+            );
           }
         }
+
+        command.execute(client, message, args);
       } catch (error) {
         log(error, "err");
       }

@@ -5,24 +5,28 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node .",
+    "dev": "nodemon ."
   },
   "keywords": [],
   "author": "Sunaookami Shiroko",
   "license": "MIT",
   "dependencies": {
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.4.1",
-    "mongoose": "^8.1.1",
-    "node-cache": "^5.1.2",
-    "systeminformation": "^5.21.24"
+    "@prisma/client": "^5.9.1",
+    "discord.js": "^14.14.1"
   },
   "devDependencies": {
     "chalk": "4.1.2",
     "dd-trace": "^5.2.0",
+    "dotenv": "^16.4.2",
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",
-    "nodemon": "^3.0.3"
+    "node-cache": "^5.1.2",
+    "nodemon": "^3.0.3",
+    "prettier": "^3.2.5",
+    "prisma": "^5.9.1",
+    "systeminformation": "^5.21.24"
   }
 }

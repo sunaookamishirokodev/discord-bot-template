@@ -34,17 +34,6 @@ const log = (string, style) => {
 };
 
 /**
- * Formats a timestamp.
- *
- * @param {number} time - The timestamp in milliseconds.
- * @param {import('discord.js').TimestampStylesString} style - The timestamp style.
- * @returns {string} - The formatted timestamp.
- */
-const time = (time, style) => {
-  return `<t:${Math.floor(time / 1000)}${style ? `:${style}` : ""}>`;
-};
-
-/**
  * Whenever a string is a valid snowflake (for Discord).
 
  * @param {string} id 
@@ -56,6 +45,5 @@ const isSnowflake = (id) => {
 
 module.exports = {
   log,
-  time,
   isSnowflake,
 };

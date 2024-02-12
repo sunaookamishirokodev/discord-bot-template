@@ -13,5 +13,5 @@ module.exports = () => {
     let mem = await si.mem();
     let ram = mem.available - mem.swaptotal;
     log("CURRENT RAM: " + ram / (1024 * 1024 * 1024) + "GB", "info");
-  });
+  }, 5_000 * 60);
 };

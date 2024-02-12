@@ -13,12 +13,13 @@ const {
   ActivityType,
   Collection,
 } = require("discord.js");
+const { PrismaClient } = require("@prisma/client");
 
 // Check bot token
-require("dotenv").config({ path: "./secret/env" });
+require("dotenv").config();
 if (!process.env.BOT_TOKEN) {
   return log(
-    "No bot token found. Please edit ./secret/env file and add your token",
+    "No bot token found. Please edit /.env file and add your token",
     "err"
   );
 }
@@ -33,17 +34,27 @@ if (!debug) require("dd-trace").init();
 // Check RAM
 require("./utils/checkRam")();
 
+// Init Prisma Client queries
+const prisma = new PrismaClient();
+log("Connected to prisma", "done");
+async function main() {
+  const allUsers = await prisma.users.findMany();
+  console.log(allUsers);
+}
+
 // Create new client
 const client = new Client({
   intents: [Object.keys(GatewayIntentBits)],
   partials: [Object.keys(Partials)],
   presence: {
     status: "idle",
-    activities: {
-      name: "Coding with Shiroko",
-      type: ActivityType.Custom,
-      state: "Discord bot template",
-    },
+    activities: [
+      {
+        name: "Coding with Shiroko",
+        type: ActivityType.Custom,
+        state: "Discord bot template",
+      },
+    ],
     afk: true,
   },
 });
@@ -52,6 +63,12 @@ const global = {
   prefixCommands: new Collection(),
   slashCommands: new Collection(),
   aliases: new Collection(),
+  components: {
+    buttons: new Collection(),
+    selects: new Collection(),
+    modals: new Collection(),
+    autocompletes: new Collection(),
+  },
   emojis: {
     error: "❌",
     success: "✔️",
@@ -61,13 +78,22 @@ const global = {
   },
 };
 
-await client.login(process.env.BOT_TOKEN).then((token) => {
+client.login(process.env.BOT_TOKEN).then((token) => {
   client.commandArray = [];
 
   require("./src/handlers/commands")();
 
   if (config.deploy) require("./src/handlers/deploy")(client);
-  if (config.mongodb) require("./src/handlers/mongoose")();
+
+  main()
+    .then(async () => {
+      await prisma.$disconnect();
+    })
+    .catch(async (e) => {
+      console.error(e);
+      await prisma.$disconnect();
+      process.exit(1);
+    });
 });
 
 module.exports = {
