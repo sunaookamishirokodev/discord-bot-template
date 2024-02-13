@@ -8,6 +8,7 @@
 const { REST, Routes } = require("discord.js");
 const config = require("../../secret/config.json");
 const { log, isSnowflake } = require("../../utils/extensions");
+const { global } = require("../..");
 
 /**
  *
@@ -25,14 +26,14 @@ module.exports = async (client) => {
         }
 
         await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID || config.client.id, guildId), {
-          body: client.commandArray,
+          body: global.commandArray,
         });
 
         log(`Successfully loaded application commands to guild id ${guildId}.`, "done");
 
     } else {
       await rest.put(Routes.applicationCommands(process.env.BOT_CLIENT_ID), {
-        body: client.commandArray,
+        body: global.commandArray,
       });
 
       log("Successfully loaded application commands globally to Discord API.", "done");

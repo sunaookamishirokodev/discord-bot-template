@@ -34,11 +34,11 @@ if (!debug) require("dd-trace").init();
 // Check RAM
 require("./utils/checkRam")();
 
-// Init Prisma Client queries
+// Init Prisma Client
 const prisma = new PrismaClient();
 log("Connected to prisma", "done");
 async function main() {
-  const allUsers = await prisma.users.findMany();
+  const allUsers = await prisma.user.findMany();
   console.log(allUsers);
 }
 
@@ -63,6 +63,7 @@ const global = {
   prefixCommands: new Collection(),
   slashCommands: new Collection(),
   aliases: new Collection(),
+  commandArray: [],
   components: {
     buttons: new Collection(),
     selects: new Collection(),
@@ -98,4 +99,5 @@ client.login(process.env.BOT_TOKEN).then((token) => {
 
 module.exports = {
   global,
+  prisma,
 };
